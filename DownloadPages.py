@@ -1,11 +1,13 @@
 import wikipediaapi
 import sys
+import os
 
 # Retrieve Wikipedia pages
 # via Wikipedia-api
 
 wiki = wikipediaapi.Wikipedia('OntologyScraper/1.0 (simonrk@gmx.de)', 'en')
 cat = wiki.page(f"Category:{sys.argv[1]}")
+
 
 def get_category_members(categorymembers, level=0, max_level=1):
     pages = []
@@ -21,7 +23,10 @@ all_pages = get_category_members(cat.categorymembers)
 
 
 def savePageContent(pages):
+    if not os.path.isdir("pages"):
+        os.mkdir("pages")
     for p_name in pages:
+        print(f"Downloading: {p_name}")
         page = wiki.page(p_name)
         with open(f"pages/{p_name}.txt", "a") as f:
             f.write(page.text)

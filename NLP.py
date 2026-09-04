@@ -30,6 +30,7 @@ matcher.add("IS_A", [pattern])
 def findPatternInPages(matcher, nlp, pages):
     with open("patterns/pattern.txt", "a") as patternFile:
         for page in pages:
+            print(f"Finding Patterns in: {page}")
             with open(join("pages", page), "r") as f:
                 content = f.read()
 
