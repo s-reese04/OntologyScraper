@@ -9,7 +9,7 @@ base_model = AutoModelForSeq2SeqLM.from_pretrained(base_model_name)
 base_model.resize_token_embeddings(len(tokenizer))
 model = PeftModel.from_pretrained(base_model, adapter_path)
 
-input_text = "Every cat is an animal"
+input_text = "A bird is an animal that can fly"
 inputs = tokenizer(input_text, return_tensors="pt")
 outputs = model.generate(**inputs, max_length=128)
 

@@ -1,46 +1,63 @@
+import os
+import re
+import glob
 import spacy
-from spacy.matcher import DependencyMatcher
-from os import listdir, makedirs
-from os.path import isfile, join
 
-nlp = spacy.load("en_core_web_sm")
-matcher = DependencyMatcher(nlp.vocab)
+def clean_wikipedia_text(text: str) -> str:
+    text = re.sub(r"\[.*?\]", "", text)
+    text = re.sub(r"={2,}.*?={2,}", "", text)
+    text = re.sub(r"'{2,}", "", text)
+    text = re.sub(r"\|.*?=.*?(\n|$)"," ", text)
+    text = re.sub(r"\{\{.*?\}\}", "", text)
+    text = re.sub(r"https?://\S+", "", text)
+    text = re.sub(r"www\.\S+", "", text)
+    text = re.sub(r"&\w+;", "", text)
+    text = re.sub(r"<.*?>", "", text)
+    text = re.sub(r"^\s*[*#]+\s*", "", text, flags=re.MULTILINE)
+    text = re.sub(r"\n{2,}", "\n", text)
+    text = re.sub(r" {2,}", " ", text)
+    text = re.sub(r"\n", " ", text)
 
-pattern = [
-    {
-        "RIGHT_ID": "predicate",
-        "RIGHT_ATTRS": {"LEMMA": "be"}
-    },
-    {
-        "LEFT_ID": "predicate",
-        "REL_OP": ">",
-        "RIGHT_ID": "subject",
-        "RIGHT_ATTRS": {"DEP": "nsubj"}
-    },
-    {
-        "LEFT_ID": "predicate",
-        "REL_OP": ">",
-        "RIGHT_ID": "object",
-        "RIGHT_ATTRS": {"DEP": "attr"}
-    }
-]
-matcher.add("IS_A", [pattern])
+    return text.strip()
 
+def is_valid_sentence(sentence: str) -> bool:
 
-def findPatternInPages(matcher, nlp, pages):
-    with open("patterns/pattern.txt", "a") as patternFile:
-        for page in pages:
-            print(f"Finding Patterns in: {page}")
-            with open(join("pages", page), "r") as f:
-                content = f.read()
+    s = sentence.strip()
 
-            doc = nlp(content)
-            matches = matcher(doc)
-            for match_id, token_ids in matches:
-                subj = doc[token_ids[1]]
-                obj = doc[token_ids[2]]
-                patternFile.write(f"{subj.text} IS-A {obj.text}\n")
+    if len(s.split()) < 4:
+        return False
 
+    if re.fullmatch(r"[\W\d]+", s):
+        return False
+    
+    if not re.search(r"[.!?]$", s):
+        return False
 
-pages = [f for f in listdir("pages") if isfile(join("pages", f))]
-findPatternInPages(matcher, nlp, pages)
+    return True
+    
+
+def process_pages(input_folder: str = "pages", output_file: str = "patterns/sentences.txt"):
+    nlp = spacy.load("en_core_web_sm")
+
+    txt_files = sorted(glob.glob(os.path.join(input_folder, "*.txt")))
+
+    total_sentences = 0
+
+    with open(output_file, "w", encoding="utf-8") as out_f:
+        for filepath in txt_files:
+            print(f"Parsing: {filepath}")
+            with open(filepath, "r", encoding="utf-8") as in_f:
+                text=in_f.read()
+            
+            text = clean_wikipedia_text(text)
+
+            doc = nlp(text)
+    
+            for sent in doc.sents:
+                sentence = sent.text.strip() 
+                if is_valid_sentence(sentence):
+                    out_f.write(sentence + "\n")
+                    total_sentences += 1
+
+if __name__ == "__main__":
+    process_pages("pages", "patterns/sentences.txt")

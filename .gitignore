@@ -1,4 +1,4 @@
-t5-small-lora-logic/
 t5_fineTuned/
+t5_fineTuned_merged/
 .ipynb_checkpoints/
 .gitignore/
