@@ -10,11 +10,6 @@ A machine learning pipeline that turns raw text into **Axioms in the ALS DL Lang
 - [Tech Stack](#tech-stack)
 - [Installation](#installation)
 - [Usage](#usage)
-  - [1. Download Wikipedia Pages](#1-download-wikipedia-pages)
-  - [2. Preprocess into Sentences](#2-preprocess-into-sentences)
-  - [3. Fine-Tune T5 with LoRA](#3-fine-tune-t5-with-lora)
-  - [4. Merge the LoRA Adapter](#4-merge-the-lora-adapter)
-  - [5. Reinforcement Learning with PPO](#5-reinforcement-learning-with-ppo)
 - [Roadmap](#roadmap)
 - [License](#license)
 
